@@ -1,0 +1,56 @@
+# CC Lab-2 — Event Service
+
+Minimal sample FastAPI application with basic event registration and simple load tests using Locust.
+
+## Project summary
+- Small web app demonstrating user registration, event listing, registration, and checkout.
+- Includes Locust scenarios for load testing (`locust/`).
+
+## Prerequisites
+- Python 3.10+ (tested)
+- Install dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+## Quick start (development)
+
+Start the FastAPI app with auto-reload:
+
+```powershell
+uvicorn main:app --reload
+```
+
+Open `http://127.0.0.1:8000` and use the UI.
+
+## Running load tests (Locust)
+
+Run a specific Locust scenario file from the `locust/` folder:
+
+```powershell
+locust -f locust/events_locustfile.py
+locust -f locust/myevents_locustfile.py
+```
+
+Then open the Locust web UI to start a test and view metrics.
+
+## Endpoints (summary)
+- `GET /register` — register page
+- `POST /register` — create user (form)
+- `GET /login` — login page
+- `POST /login` — perform login (form)
+- `GET /events` — list events (accepts `?user=`)
+- `GET /register_event/{event_id}?user=` — register logged-in user for event
+- `GET /my-events?user=` — show user's registrations
+- `GET /checkout` — compute checkout total
+
+## Notes on optimizations
+- Removed artificial CPU-bound loops that simulated work (they were causing high latency).
+- Added a short in-memory cache for `GET /events` (`EVENTS_CACHE`) to reduce DB reads under load.
+- Added a per-user cache for `GET /my-events` (`MY_EVENTS_CACHE`) and invalidate on registration.
+- Queries now select only needed columns to reduce DB and template overhead.
+
+## Configuration
+- `EVENTS_CACHE_TTL` and `MY_EVENTS_CACHE_TTL` are defined in `main.py` (default 5s). Adjust for freshness vs performance.
+- DB file: `fest.db` (SQLite).
